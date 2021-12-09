@@ -16,7 +16,7 @@ def convert_row(row, schema):
         else:
             declared_types = ['string','null']
 
-        LOGGER.debug('Converting {} value {} to {}'.format(key, value, declared_types))
+        LOGGER.info('Converting {} value {} to {}'.format(key, value, declared_types))
         coerced = coerce(value, declared_types)
         to_return[key] = coerced
 
