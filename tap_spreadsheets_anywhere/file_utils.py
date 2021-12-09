@@ -35,15 +35,17 @@ def resolve_target_uri(table_spec, target_filename):
 def write_file(target_filename, table_spec, schema, max_records=-1):
     LOGGER.info('Syncing file "{}".'.format(target_filename))
     target_uri = resolve_target_uri(table_spec, target_filename)
+
+    # Do not store part of the path before the "@" symbol
+    delim = '@'
+    path = table_spec['path']
+    path = path[path.find(delim) + len(delim):]
+
     records_synced = 0
     try:
         iterator = tap_spreadsheets_anywhere.format_handler.get_row_iterator(table_spec, target_uri)
-        delim = '@'
-        for row in iterator:
 
-            # Do not store part of the path before the "@" symbol
-            path = table_spec['path']
-            path = path[path.find(delim) + len(delim):]
+        for row in iterator:
 
             metadata = {
                 '_smart_source_bucket': path,
