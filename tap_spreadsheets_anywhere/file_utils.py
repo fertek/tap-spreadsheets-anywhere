@@ -38,9 +38,15 @@ def write_file(target_filename, table_spec, schema, max_records=-1):
     records_synced = 0
     try:
         iterator = tap_spreadsheets_anywhere.format_handler.get_row_iterator(table_spec, target_uri)
+        delim = '@'
         for row in iterator:
+
+            # Do not store part of the path before the "@" symbol
+            path = table_spec['path']
+            path = path[path.find(delim) + len(delim):]
+
             metadata = {
-                '_smart_source_bucket': table_spec['path'],
+                '_smart_source_bucket': path,
                 '_smart_source_file': target_filename,
                 # index zero, +1 for header row
                 '_smart_source_lineno': records_synced + 2
