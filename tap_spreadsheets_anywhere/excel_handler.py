@@ -14,6 +14,9 @@ def generator_wrapper(reader):
             header_row = row
             continue
 
+        if all(c.value is None for c in row):
+            continue
+
         for index, cell in enumerate(row):
             header_cell = header_row[index]
 
