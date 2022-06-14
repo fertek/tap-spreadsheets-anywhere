@@ -56,12 +56,12 @@ def generate_schema(table_spec, samples):
     merged_schema = override_schema_with_config(inferred_schema, table_spec)
     return Schema.from_dict(merged_schema)
 
-def discover(config, state):
+def discover(config, state=None):
     streams = []
     for table_spec in config['tables']:
         try:
             modified_since = dateutil.parser.parse(
-                state.get(stream.tap_stream_id, {}).get('modified_since') or table_spec['start_date'])
+                (state or {}).get(table_spec['name'], {}).get('modified_since') or table_spec['start_date'])
             target_files = file_utils.get_matching_objects(table_spec, modified_since)
             sample_rate = table_spec.get('sample_rate',5)
             max_sampling_read = table_spec.get('max_sampling_read', 1000)
@@ -147,7 +147,7 @@ def main():
     tables_config = Config.validate(tables_config)
     # If discover flag was passed, run discovery mode and dump output to stdout
     if args.discover:
-        catalog = discover(tables_config, args.state)
+        catalog = discover(tables_config)
         catalog.dump()
     # Otherwise run in sync mode
     else:
