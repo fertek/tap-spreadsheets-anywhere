@@ -56,12 +56,11 @@ def generate_schema(table_spec, samples):
     merged_schema = override_schema_with_config(inferred_schema, table_spec)
     return Schema.from_dict(merged_schema)
 
-def discover(config, state=None):
+def discover(config):
     streams = []
     for table_spec in config['tables']:
         try:
-            modified_since = dateutil.parser.parse(
-                (state or {}).get(table_spec['name'], {}).get('modified_since') or table_spec['start_date'])
+            modified_since = dateutil.parser.parse(table_spec['start_date'])
             target_files = file_utils.get_matching_objects(table_spec, modified_since)
             sample_rate = table_spec.get('sample_rate',5)
             max_sampling_read = table_spec.get('max_sampling_read', 1000)
@@ -156,7 +155,7 @@ def main():
             LOGGER.info(f"Using supplied catalog {args.catalog_path}.")
         else:
             LOGGER.info(f"Generating catalog through sampling.")
-            catalog = discover(tables_config, args.state)
+            catalog = discover(tables_config)
         if LOGGER.isEnabledFor(logging.DEBUG):
             LOGGER.debug(f"Catalog has streams: {catalog.to_dict()}")
         sync(tables_config, args.state, catalog)
